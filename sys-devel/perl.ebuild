@@ -1,6 +1,6 @@
 # Copyright 1999-2002 Gentoo Technologies, Inc.
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/sys-devel/perl/perl-5.6.1-r7.ebuild,v 1.5 2002/10/17 16:34:48 bjb Exp $
+# $Header: /var/cvsroot/gentoo-x86/sys-devel/perl/perl-5.6.1-r7.ebuild,v 1.6 2002/11/22 19:03:38 mcummings Exp $
 
 IUSE="berkdb gdbm"
 
@@ -20,6 +20,9 @@ DEPEND="sys-apps/groff
 	${RDEPEND}"
 
 src_compile() {
+
+    #The following is to handle international users. Perl does nls post-install
+    export LC_ALL=C
 
     if [ "${ARCH}" = "alpha" ]; then
         CFLAGS="${CFLAGS} -fPIC"
@@ -143,6 +146,8 @@ EOF
 }
 
 src_install() {
+#The following is to handle international users. Perl does nls post-install 
+    export LC_ALL=C 
 
     export PARCH=`grep myarchname config.sh | cut -f2 -d"'"`
 
