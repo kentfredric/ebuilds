@@ -1,6 +1,6 @@
 # Copyright 1999-2002 Gentoo Technologies, Inc.
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/sys-devel/perl/perl-5.6.1-r7.ebuild,v 1.3 2002/10/05 05:39:26 drobbins Exp $
+# $Header: /var/cvsroot/gentoo-x86/sys-devel/perl/perl-5.6.1-r7.ebuild,v 1.4 2002/10/13 11:57:04 seemant Exp $
 
 IUSE="berkdb gdbm"
 
@@ -12,22 +12,25 @@ LICENSE="Artistic GPL-2"
 SLOT="0"
 KEYWORDS="x86 ppc sparc sparc64"
 
-DEPEND="sys-apps/groff berkdb? ( >=sys-libs/db-3.2.3h-r3 =sys-libs/db-1.85-r1 ) gdbm? ( >=sys-libs/gdbm-1.8.0 )"
+RDEPEND="gdbm? ( >=sys-libs/gdbm-1.8.0 )
+	berkdb? ( >=sys-libs/db-3.2.3h-r3
+		=sys-libs/db-1.85-r1 )"
 
-RDEPEND="berkdb? ( >=sys-libs/db-3.2.3h-r3 =sys-libs/db-1.85-r1 ) gdbm? ( >=sys-libs/gdbm-1.8.0 )"
+DEPEND="sys-apps/groff
+	${RDEPEND}"
 
 src_compile() {
 
     local myconf
     if [ "`use gdbm`" ]
     then
-      myconf="-Di_gdbm"
+		myconf="-Di_gdbm"
     fi
     if [ "`use berkdb`" ]
     then
-      myconf="${myconf} -Di_db -Di_ndbm"
+		myconf="${myconf} -Di_db -Di_ndbm"
     else
-      myconf="${myconf} -Ui_db -Ui_ndbm"
+		myconf="${myconf} -Ui_db -Ui_ndbm"
     fi
 
 	# configure for libperl.so
@@ -57,8 +60,8 @@ src_compile() {
 	make -f Makefile depend || die
 	mv makefile makefile_orig
 	mv x2p/makefile x2p/makefile_orig
-        egrep -v "(<built-in>|<command line>)" makefile_orig >makefile
-        egrep -v "(<built-in>|<command line>)" x2p/makefile_orig >x2p/makefile
+		  egrep -v "(<built-in>|<command line>)" makefile_orig >makefile
+		  egrep -v "(<built-in>|<command line>)" x2p/makefile_orig >x2p/makefile
 	make -f Makefile libperl.so || die
 	mv libperl.so ${WORKDIR}
 
@@ -143,27 +146,39 @@ src_install() {
 	dosym /usr/lib/perl5/${PV}/${PARCH}/CORE/libperl.so /usr/lib/libperl.so
 	
 
-#    make -f Makefile INSTALLMAN1DIR=${D}/usr/share/man/man1 INSTALLMAN3DIR=${D}/usr/share/man/man3 install || die
-	make DESTDIR=${D} INSTALLMAN1DIR=${D}/usr/share/man/man1 INSTALLMAN3DIR=${D}/usr/share/man/man3 install || die "Unable to make install"
+#    make -f Makefile \
+#		INSTALLMAN1DIR=${D}/usr/share/man/man1 \
+#		INSTALLMAN3DIR=${D}/usr/share/man/man3 \
+#		install || die
+
+	make \
+		DESTDIR=${D} \
+		INSTALLMAN1DIR=${D}/usr/share/man/man1 \
+		INSTALLMAN3DIR=${D}/usr/share/man/man3 \
+		install || die "Unable to make install"
     install -m 755 utils/pl2pm ${D}/usr/bin/pl2pm
 
 
-#man pages
+	#man pages
 
-#    ./perl installman --man1dir=${D}/usr/share/man/man1 --man1ext=1 --man3dir=${D}/usr/share/man/man3 --man3ext=3
+#	./perl installman \
+#		--man1dir=${D}/usr/share/man/man1 \
+#		--man1ext=1 \
+#		--man3dir=${D}/usr/share/man/man3 \
+#		--man3ext=3
 
 
-# This removes ${D} from Config.pm
+	# This removes ${D} from Config.pm
 
-  dosed /usr/lib/perl5/${PV}/${CHOST%%-*}-linux/Config.pm
-  dosed /usr/lib/perl5/${PV}/${CHOST%%-*}-linux/.packlist
+	dosed /usr/lib/perl5/${PV}/${CHOST%%-*}-linux/Config.pm
+	dosed /usr/lib/perl5/${PV}/${CHOST%%-*}-linux/.packlist
 
-# DOCUMENTATION
+	# DOCUMENTATION
 
     dodoc Changes* Artistic Copying README Todo* AUTHORS
     prepalldocs
 
-# HTML Documentation
+	# HTML Documentation
     
 	dodir /usr/share/doc/${PF}/html
     ./perl installhtml --recurse --htmldir=${D}/usr/share/doc/${PF}/html
