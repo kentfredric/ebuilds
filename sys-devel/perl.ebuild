@@ -1,6 +1,6 @@
 # Copyright 1999-2002 Gentoo Technologies, Inc.
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/sys-devel/perl/perl-5.8.0-r6.ebuild,v 1.4 2002/12/20 16:56:41 mcummings Exp $
+# $Header: /var/cvsroot/gentoo-x86/sys-devel/perl/perl-5.8.0-r6.ebuild,v 1.5 2002/12/22 06:02:47 mcummings Exp $
 
 IUSE="berkdb gdbm"
 
@@ -46,6 +46,8 @@ src_compile() {
 		einfo "using threads"
 		mythreading="-multi"
 		myconf="-Dusethreads ${myconf}"
+	else
+		myconf="-Uusethreads ${myconf}"
 	fi
 	myarch="${CHOST%%-*}-linux-thread"
 
