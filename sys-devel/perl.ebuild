@@ -1,12 +1,12 @@
 # Copyright 1999-2002 Gentoo Technologies, Inc.
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/sys-devel/perl/perl-5.6.1-r8.ebuild,v 1.7 2002/12/09 04:37:27 manson Exp $
+# $Header: /var/cvsroot/gentoo-x86/sys-devel/perl/perl-5.6.1-r8.ebuild,v 1.8 2002/12/10 21:33:21 mcummings Exp $
 
 IUSE="berkdb gdbm"
 
 S=${WORKDIR}/${P}
 DESCRIPTION="Larry Wall's Practical Extraction and Reporting Language"
-SRC_URI="ftp://ftp.perl.org/pub/CPAN/src/${P}.tar.gz"
+SRC_URI="$ftp://ftp.perl.org/pub/CPAN/src/${P}.tar.gz"
 HOMEPAGE="http://www.perl.org"
 LICENSE="Artistic GPL-2"
 SLOT="0"
@@ -42,7 +42,6 @@ src_compile() {
     else
 		myconf="${myconf} -Ui_db -Ui_ndbm"
     fi
-	
 
 	# configure for libperl.so
     sh Configure -des \
@@ -50,14 +49,19 @@ src_compile() {
 		-Dcccdlflags='-fPIC' \
 		-Dcc=gcc \
 		-Dccdlflags='-rdynamic' \
-		-Dprefix=/usr \
+		-Dprefix='/usr' \
+		-Dvendorprefix='/usr' \
+		-Dsiteprefixx='/usr' \
 		-Dlocincpth=' ' \
 		-Doptimize="${CFLAGS}" \
 		-Duselargefiles \
 		-Duseshrplib \
+		-Dman3ext=3pm \
 		-Dlibperl=libperl.so \
 		-Dd_dosuid \
 		-Dd_semctl_semun \
+		-Dcf_by=Gentoo \
+		-Ud_csh \
 		${myconf} || die
 	# add optimization flags
     cp config.sh config.sh.orig
@@ -106,13 +110,19 @@ installsitearch=\`echo \$installsitearch | sed "s!\$prefix!\$installprefix!"\`
 EOF
 
     sh Configure -des \
-		-Dprefix=/usr \
 		-Dcc=gcc \
+		-Dprefix='/usr' \
+		-Dvendorprefix='/usr' \
+		-Dsiteprefixx='/usr' \
 		-Darchname=${CHOST%%-*}-linux \
+		-Doptimize="${CFLAGS}" \
 		-Duselargefiles \
 		-Dd_dosuid \
 		-Dlocincpth=' ' \
 		-Dd_semctl_semun \
+		-Dman3ext=3pm \
+		-Dcf_by=Gentoo \
+		-Ud_csh \
 		${myconf} || die
 
     #Optimize ;)
@@ -173,7 +183,6 @@ src_install() {
 		install || die "Unable to make install"
     install -m 755 utils/pl2pm ${D}/usr/bin/pl2pm
 
-
 	#man pages
 
 #	./perl installman \
@@ -193,22 +202,27 @@ src_install() {
     dodoc Changes* Artistic Copying README Todo* AUTHORS
     prepalldocs
 
-	# HTML Documentation
     
+	# HTML Documentation
 	dodir /usr/share/doc/${PF}/html
-    ./perl installhtml --recurse --htmldir=${D}/usr/share/doc/${PF}/html
+	${D}/usr/bin/perl installhtml --recurse --htmldir=${D}/usr/share/doc/${PF}/html
 
 }
 
 
 pkg_postinst() {
+#########################################
+	cd /usr/include; h2ph *.h sys/*.h
+	#This is an attempt to get MakeMaker into the perl build 
+	echo "n" | perl -MCPAN -e 'CPAN::Shell->install(ExtUtils::MakeMaker)'
 
-	einfo
-	einfo "Now that Perl is installed, you *must* install "
-	einfo "dev-perl/ExtUtils-MakeMaker. This is an update to "
-	einfo "the MakeMaker that comes bundled with Perl and includes "
-	einfo "fixes applicable to the Gentoo sandbox. You must do this"
-	einfo "even if you are re-installing Perl."
-	einfo
+#########################################
+#	einfo
+#	einfo "Now that Perl is installed, you *must* install "
+#	einfo "dev-perl/ExtUtils-MakeMaker. This is an update to "
+#	einfo "the MakeMaker that comes bundled with Perl and includes "
+#	einfo "fixes applicable to the Gentoo sandbox. You must do this"
+#	einfo "even if you are re-installing Perl."
+#	einfo
 
 }
